@@ -1,5 +1,7 @@
+import { rejects } from "assert";
 import * as mediasoup from "mediasoup";
 import { types } from "mediasoup";
+import { resolve } from "path";
 
 // =====================
 // Media Codecs
@@ -21,6 +23,19 @@ export const mediaCodecs: types.RtpCodecCapability[] = [
   },
 ];
 
+const transportOptions: types.WebRtcTransportOptions = {
+  listenIps: [
+    {
+      ip: "192.168.57.59",
+      announcedIp: undefined,
+    },
+  ],
+  enableUdp: true,
+  enableTcp: true,
+  preferUdp: true,
+  enableSctp: true,
+};
+
 // =====================
 // Create Worker
 // =====================
@@ -41,45 +56,20 @@ export const createWorker = async () => {
 };
 
 // =====================
-// Create WebRTC Transport (Local Only)
+// Create WebRTC Transport
 // =====================
-export const createWebRtcTransport = async (
-  router: types.Router,
-  callback: any
-) => {
+export const createWebRtcTransport = async (router: types.Router) => {
   try {
-    const transportOptions: types.WebRtcTransportOptions = {
-      listenIps: [
-        {
-          ip: "127.0.0.1", // For localhost only
-          announcedIp: undefined, // No need for public IP in local setup
-        },
-      ],
-      enableUdp: true,
-      enableTcp: true,
-      preferUdp: true,
-    };
-
     const transport = await router.createWebRtcTransport(transportOptions);
-    console.log("✅ WebRTC transport created:", transport.id);
+    console.log("WebRTC transport created:", transport.id);
 
     transport.on("dtlsstatechange", (dtlsState) => {
       if (dtlsState === "closed") transport.close();
     });
 
-    callback({
-      params: {
-        id: transport.id,
-        iceParameters: transport.iceParameters,
-        iceCandidates: transport.iceCandidates,
-        dtlsParameters: transport.dtlsParameters,
-        // No iceServers needed locally
-      },
-    });
-
     return transport;
   } catch (error: any) {
     console.error("❌ WebRTC Transport creation failed:", error);
-    callback({ params: { error: error.message } });
+    rejects(error);
   }
 };
