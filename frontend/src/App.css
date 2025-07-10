@@ -1,71 +1,63 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+/* Layout: Game on left, videos on right */
+.mainLayout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 20px;
+    gap: 40px;
+    flex-wrap: wrap;
 }
 
-#media {
-    padding: 20px;
-    max-width: 1200px;
-    margin: auto;
+/* Phaser game container */
+.gameContainer {
+    flex: 1;
+    min-width: 320px;
 }
 
-.mainTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+/* Videos in one vertical column */
+.videoColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 260px;
+    align-items: center;
+    flex-shrink: 0;
 }
 
-.localColumn,
-.remoteColumn {
-    vertical-align: top;
-    padding: 10px;
-    width: 50%;
+/* Local and remote video styles */
+.video,
+.remoteContainer video {
+    width: 240px;
+    height: 180px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: #000;
 }
 
-.localColumn {
-    background-color: #f0f8ff;
-    border-right: 2px solid #ccc;
+/* Remote container (stacked vertically) */
+.remoteContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.remoteColumn {
-    background-color: #fff;
+/* Join button container */
+.joinContainer {
+    text-align: center;
+    margin-top: 30px;
 }
 
-.audio,
-.video {
-    width: 100%;
-    max-width: 300px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
-
-.remoteAudio,
-.remoteVideo {
-    display: block;
-    margin-top: 10px;
-    width: 200px;
-    height: auto;
-    object-fit: cover;
-}
-
-button#join {
-    padding: 10px 20px;
-    background-color: #0066ff;
+#join {
+    background-color: #3f51b5;
     color: white;
+    padding: 10px 22px;
+    font-weight: bold;
     border: none;
     border-radius: 4px;
-    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 15px;
 }
 
-button#join:hover {
-    background-color: #004bcc;
-}
-
-h3 {
-    margin: 10px 0;
-    font-size: 1.1rem;
-    color: #333;
+#join:hover {
+    background-color: #303f9f;
 }

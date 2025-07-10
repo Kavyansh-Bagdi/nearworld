@@ -32,7 +32,7 @@ export class Player {
     this.scene = scene;
 
     this.sprite = scene.physics.add.sprite(x, y, key);
-    this.sprite.setOrigin(0, 0).setScale(1);
+    this.sprite.setOrigin(0, 0).setScale(1).setDepth(3);
 
     this.targetX = x;
     this.targetY = y;

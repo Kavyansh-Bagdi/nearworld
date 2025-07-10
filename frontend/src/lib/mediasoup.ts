@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Device, types as mediasoupTypes } from "mediasoup-client";
 import socket from "./socket";
-
+import ReactDOM from "react-dom/client";
+import RemoteMedia from "../components/remoteMedia";
+import React from "react";
 export function useMediasoup(
   socketUrl: string,
   localAudioRef: React.RefObject<HTMLAudioElement>,
@@ -16,7 +18,7 @@ export function useMediasoup(
   const consumerTransportRef = useRef<mediasoupTypes.Transport | null>(null);
   const producerRefs = useRef<mediasoupTypes.Producer[]>([]);
   const localStreamRef = useRef<MediaStream | null>(null);
-  const remoteMediaElements = useRef<Map<string, HTMLMediaElement>>(new Map());
+  const remoteMediaElements = useRef<Map<string, HTMLElement>>(new Map());
   const consumingProducers = useRef<Set<string>>(new Set());
   const consumeQueue = useRef<string[]>([]);
   const isConsumerReady = useRef(false);
@@ -41,10 +43,10 @@ export function useMediasoup(
     socket.on("consumer-paused", ({ remoteProducerId }) => {
       removeRemoteMedia(remoteProducerId);
     });
-    
+
     socket.on("consumer-resumed", async ({ remoteProducerId }) => {
-      const el = remoteMediaElements.current.get(remoteProducerId);
-      const existsInDOM = el && document.body.contains(el);
+      const wrapper = remoteMediaElements.current.get(remoteProducerId);
+      const existsInDOM = wrapper && document.body.contains(wrapper);
 
       if (!existsInDOM) {
         await consume(remoteProducerId);
@@ -62,7 +64,7 @@ export function useMediasoup(
             serverConsumerTransportId: transport.id,
           });
           callback();
-        } catch (err) {
+        } catch (err: any) {
           console.error("Consumer transport connect error:", err);
           errback(err);
         }
@@ -81,8 +83,7 @@ export function useMediasoup(
       socket.disconnect();
 
       remoteMediaElements.current.forEach((el) => {
-        el.pause();
-        el.srcObject = null;
+        ReactDOM.createRoot(el).unmount();
         el.remove();
       });
       remoteMediaElements.current.clear();
@@ -232,7 +233,6 @@ export function useMediasoup(
 
   const consume = async (producerId: string) => {
     if (consumingProducers.current.has(producerId)) return;
-
     consumingProducers.current.add(producerId);
 
     if (!consumerTransportRef.current) {
@@ -262,57 +262,42 @@ export function useMediasoup(
         });
 
         const stream = new MediaStream([consumer.track]);
-        const el = document.createElement(
-          params.kind === "audio" ? "audio" : "video"
-        );
-
-        if (params.kind === "video") {
-          Object.assign(el.style, {
-            width: "200px",
-            height: "150px",
-            objectFit: "cover",
-          });
-
-          el.muted = true; // Required for autoplay on mobile
-        }
-
-        el.srcObject = stream;
-        el.autoplay = true;
-        el.controls = true;
-        el.playsInline = true;
-        el.className = `media remote-${params.kind}`;
 
         const container = document.getElementById(remoteContainerId);
-        if (container) {
-          container.appendChild(el);
-          remoteMediaElements.current.set(params.producerId, el);
+        if (!container) {
+          console.warn("Remote container not found. Skipping rendering.");
+          return;
+        }
 
-          try {
-            await el.play();
-          } catch (e) {
-            console.warn("Autoplay failed:", e);
-          }
+        const wrapper = document.createElement("div");
+        wrapper.id = `media-${producerId}`;
+        container.appendChild(wrapper);
+        remoteMediaElements.current.set(producerId, wrapper);
 
+        const root = ReactDOM.createRoot(wrapper);
+        root.render(
+          React.createElement(RemoteMedia, {
+            stream,
+            kind: params.kind,
+          })
+        );
+
+        try {
           socket.emit("consumer-resume", { serverConsumerId: consumer.id });
-        } else {
-          console.warn("Remote container not found. Element not added.");
+        } catch (e) {
+          console.warn("Error resuming consumer:", e);
         }
 
         consumingProducers.current.delete(producerId);
       }
     );
   };
+
   const removeRemoteMedia = (producerId: string) => {
-    const el = remoteMediaElements.current.get(producerId);
-    if (el) {
-      el.pause();
-      el.srcObject?.getTracks().forEach((track) => track.stop());
-      el.srcObject = null;
-
-      if (el.parentElement) {
-        el.parentElement.removeChild(el); // safer than el.remove()
-      }
-
+    const wrapper = remoteMediaElements.current.get(producerId);
+    if (wrapper) {
+      ReactDOM.createRoot(wrapper).unmount();
+      wrapper.remove();
       remoteMediaElements.current.delete(producerId);
     }
 
