@@ -25,7 +25,7 @@ const PhaserGame: React.FC = () => {
 
             preload() {
                 this.load.tilemapTiledJSON("map", "/assets/map");
-                this.load.image("tiles", "/assets/Dungeon forest.png");
+                this.load.image("tiles", "/assets/Outside.png");
                 this.load.spritesheet("player", "/assets/1.png", {
                     frameWidth: 32,
                     frameHeight: 48,
@@ -34,26 +34,40 @@ const PhaserGame: React.FC = () => {
 
             create() {
                 const map = this.make.tilemap({ key: "map" });
-                const tileset = map.addTilesetImage("tileset", "tiles");
-                if (tileset) {
-                    map.createLayer("ground", tileset, 0, 0);
-                }
+                const tileset = map.addTilesetImage("allinone", "tiles");
+                const water = map.createLayer('water', tileset!, 0, 0)?.setDepth(0);
+                const water_top = map.createLayer('water_top', tileset!, 0, 0)?.setDepth(1);
+                const ground = map.createLayer('ground', tileset!, 0, 0)?.setDepth(2);
+                const grass = map.createLayer('grass', tileset!, 0, 0)?.setDepth(3);
+                const rocks_trees = map.createLayer('rocks_&_trees', tileset!, 0, 0)?.setDepth(4);
+                const buliding = map.createLayer('building', tileset!, 0, 0)?.setDepth(5);
+                const buliding_top = map.createLayer('building_top', tileset!, 0, 0)?.setDepth(6);
+                const tree_top = map.createLayer('tree_top', tileset!, 0, 0)?.setDepth(7);
+
 
                 Player.registerAnimations(this);
 
                 cursors = this.input.keyboard!.createCursorKeys();
 
-                localPlayer = this.physics.add.sprite(100, 100, "player").setOrigin(0, 0);
+                localPlayer = this.physics.add.sprite(500, 500, "player").setOrigin(0, 0).setDepth(3);
                 localPlayer.anims.play("idle-down", true);
                 lastSentX = localPlayer.x;
                 lastSentY = localPlayer.y;
+
+                water!.setCollisionByExclusion([-1]);
+                buliding!.setCollisionByExclusion([-1]);
+                rocks_trees!.setCollisionByExclusion([-1]);
+
+                this.physics.add.collider(localPlayer, water!);
+                this.physics.add.collider(localPlayer, buliding!);
+                this.physics.add.collider(localPlayer, rocks_trees!);
 
                 this.remoteGroup = this.physics.add.group();
                 this.physics.add.collider(localPlayer, this.remoteGroup);
 
                 this.cameras.main.startFollow(localPlayer);
                 this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-
+                this.cameras.main.setZoom(3);
                 socket.on("players-update", (players: any[]) => {
                     const currentIds = new Set<string>();
 
@@ -140,15 +154,15 @@ const PhaserGame: React.FC = () => {
         if (gameContainerRef.current && !phaserGameRef.current) {
             phaserGameRef.current = new Phaser.Game({
                 type: Phaser.AUTO,
-                width: 320,
-                height: 352,
+                width: 4 * 10 * 32,
+                height: 3 * 10 * 32,
                 parent: gameContainerRef.current,
                 scene: MainScene,
                 backgroundColor: "#ffffff",
                 physics: {
                     default: "arcade",
                     arcade: {
-                        gravity: { y: 0 },
+                        gravity: { x: 0, y: 0 },
                         debug: false,
                     },
                 },
