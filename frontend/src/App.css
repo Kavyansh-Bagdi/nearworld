@@ -1,53 +1,71 @@
-button {
-    margin: 2px;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
 }
 
-tr {
-    vertical-align: top;
-}
-
-video {
-    width: 360px;
-    background-color: black;
-    padding: 10px;
-    margin: 1px 1px;
+#media {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
 }
 
 .mainTable {
     width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.localColumn,
+.remoteColumn {
+    vertical-align: top;
+    padding: 10px;
+    width: 50%;
 }
 
 .localColumn {
-    width: 246px;
+    background-color: #f0f8ff;
+    border-right: 2px solid #ccc;
 }
 
 .remoteColumn {
-    display: flex;
-    flex-wrap: wrap;
+    background-color: #fff;
 }
 
-#localVideo {
-    width: 240px;
+.audio,
+.video {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
 }
 
+.remoteAudio,
 .remoteVideo {
-    float: left;
+    display: block;
+    margin-top: 10px;
+    width: 200px;
+    height: auto;
+    object-fit: cover;
 }
 
-.videoWrap {
-    margin: 3px;
-    display: flex;
-    justify-content: center;
+button#join {
+    padding: 10px 20px;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-@media only screen and (max-width: 1060px) {
-    .video {
-        width: 300px;
-    }
+button#join:hover {
+    background-color: #004bcc;
 }
 
-@media only screen and (max-width: 940px) {
-    .video {
-        width: 240px;
-    }
+h3 {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    color: #333;
 }
