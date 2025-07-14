@@ -112,6 +112,9 @@ npm run dev
 > \[!CAUTION]
 > Since you're using self-signed certificates, your browser may initially block the URLs. You'll need to bypass the security warning manually.
 
+> [!NOTE]  
+> Use only Chromium-based browsers such as **Google Chrome** or **Brave** for the best compatibility.
+
 ## Folder Structure
 
 ```
