@@ -135,3 +135,5 @@ Planned improvements:
 ![Map Preview](images/map.png)
 
 ![Screenshot](images/screenshot.png)
+
+![Watch Demo](images/video.mp4)
